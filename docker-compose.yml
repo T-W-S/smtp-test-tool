@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  smtp-tool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smtp-tool
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - smtp-tool-data:/data
+    environment:
+      - SMTP_CONFIG_DIR=/data/config
+      - SMTP_LOG_DIR=/data/logs
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+      - WORKERS=1  # Only use 1 worker to prevent duplicate email submissions
+    networks:
+      - smtp-tool-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health_check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  smtp-tool-data:
+    name: smtp-tool-data
+
+networks:
+  smtp-tool-network:
+    name: smtp-tool-network
+    driver: bridge

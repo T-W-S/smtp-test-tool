@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Python dependencies
 RUN pip install --no-cache-dir -U pip
 
-# Install required packages (without office document dependencies)
+# Install required packages
 RUN pip install --no-cache-dir email-validator flask flask-sqlalchemy gunicorn \
     psycopg2-binary reportlab requests
 

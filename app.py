@@ -308,8 +308,7 @@ def send_email():
                         f.write(data)
                     attachments.append(temp_path)
                 
-                # Word and Excel attachment types have been removed
-                
+               
                 elif attachment_type == 'eicar':
                     filename, data = smtp_tool.create_eicar_attachment()
                     temp_path = os.path.join('/tmp', filename)

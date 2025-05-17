@@ -389,9 +389,7 @@ class SMTPTool:
         buffer.seek(0)
         return filename, buffer.getvalue()
     
-    # Word document attachment creation has been removed as requested
-    
-    # Excel spreadsheet attachment creation has been removed as requested
+
         
     def create_spf_test_email(self, recipient):
         """Create an email specifically to test SPF validation
@@ -555,7 +553,7 @@ This is purely for testing email authentication mechanisms.
                 'X-SPF-Test': 'This email should fail SPF validation',
                 'X-DKIM-Test': 'This email should fail DKIM validation',
                 'X-DMARC-Test': 'This email should fail DMARC validation',
-                # Add a realistic DKIM header matching the format you provided
+                # Add realistic DKIM header
                 'DKIM-Signature': """v=1; a=rsa-sha256; d=microsoft.com; s=s1024-meo;
         c=relaxed/relaxed; i=microsoft-noreply@microsoft.com; t=1744862738;
         h=from:subject:date:message-id:to:mime-version:content-type;

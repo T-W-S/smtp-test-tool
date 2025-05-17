@@ -1,4 +1,4 @@
-## NOTE: ** SPF and DKIM preconfigured test emails not complete yet i.e. SPF "only" triggers SPF softfail, DKIM does the same. **
+## NOTE: **SPF and DKIM preconfigured test emails not complete yet i.e. SPF "only" triggers SPF softfail, DKIM does the same.**
 
 # SMTP Testing Tool
 

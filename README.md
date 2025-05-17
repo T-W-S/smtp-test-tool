@@ -1,6 +1,6 @@
 # SMTP Testing Tool
 
-A robust SMTP testing and email sending utility designed for Linux environments, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
+A robust SMTP testing and email sending utility designed for Docker, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
 
 ![Main Interface](screenshots/main_interface.png)
 
@@ -10,7 +10,6 @@ A robust SMTP testing and email sending utility designed for Linux environments,
 - **CLI support** for scripting and automation
 - **Advanced email validation** testing (DKIM, SPF, DMARC)
 - **Template management** for reusing common email formats
-- **Cross-platform compatibility** with Docker support
 - **Responsive UI** with customizable orange theme
 
 ## Quick Start
@@ -21,18 +20,6 @@ A robust SMTP testing and email sending utility designed for Linux environments,
 2. Run with Docker Compose:
    ```
    docker-compose up -d
-   ```
-3. Access the web interface at http://localhost:5000
-
-### Running Locally
-
-1. Install required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-2. Run the application:
-   ```
-   python main.py
    ```
 3. Access the web interface at http://localhost:5000
 

@@ -11,11 +11,11 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ## Features
 
-- **Web GUI** with intuitive and customizable design
-- **CLI support** for scripting and automation
-- **Advanced email validation** testing (*DKIM, *SPF, DMARC) *see NOTE:
-- **Template management** for reusing common email formats
-- **Responsive UI** with customizable orange theme
+- ***Web GUI** *with intuitive and customizable design*
+- ***CLI support** *for scripting and automation*
+- ***Advanced email validation** *testing (*DKIM, *SPF, DMARC) *see NOTE:*
+- ***Template management** *for reusing common email formats*
+- ***Responsive UI** *with customizable orange theme*
 
 ## Quick Start
 
@@ -37,10 +37,10 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ![Email Testing](screenshots/email_testing.png)
 
-- Send test emails with customizable settings
-- Test SPF, DKIM, and DMARC configurations
-- Create and use email templates
-- Attach files to test emails
+- *Send test emails with customizable settings*
+- *Test SPF, DKIM, and DMARC configurations*
+- *Create and use email templates*
+- *Attach files to test emails*
 
 * ### SMTP Profile Management
 
@@ -48,9 +48,9 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ![SMTP Profiles](screenshots/smtp_profiles.png)
 
-- Save and manage multiple SMTP server profiles
-- Test connection to SMTP servers
-- Configure TLS/SSL options
+- *Save and manage multiple SMTP server profiles*
+- *Test connection to SMTP servers*
+- *Configure TLS/SSL options*
 
 * ### Logging and History
 
@@ -58,16 +58,16 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ![Email Logs](screenshots/email_logs.png)
 
-- View detailed logs of sent emails
-- Monitor success and error rates
-- Filter and search through email history
+- *View detailed logs of sent emails*
+- *Monitor success and error rates*
+- *Filter and search through email history*
 
 ## Docker Support
 
 The application includes Docker support for easy deployment, with persistent volumes for:
-- Configuration data
-- Email templates
-- Logs
+- *Configuration data*
+- *Email templates*
+- *Logs*
 
 ## License
 

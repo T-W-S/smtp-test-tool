@@ -23,6 +23,7 @@ A robust SMTP testing and email sending utility designed for Docker, providing c
 
 1. Clone the repository
 2. Run with Docker Compose:
+
    ```
    docker-compose up -d
    ```

@@ -6,6 +6,7 @@
 
 A SMTP testing and email sending utility designed for Docker, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
 
+
 ![Main Interface](screenshots/main_interface.png)
 
 ## Features
@@ -32,6 +33,7 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ### Email Testing
 
+
 ![Email Testing](screenshots/email_testing.png)
 
 - Send test emails with customizable settings
@@ -41,6 +43,7 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 
 ### SMTP Profile Management
 
+
 ![SMTP Profiles](screenshots/smtp_profiles.png)
 
 - Save and manage multiple SMTP server profiles
@@ -48,6 +51,7 @@ A SMTP testing and email sending utility designed for Docker, providing comprehe
 - Configure TLS/SSL options
 
 ### Logging and History
+
 
 ![Email Logs](screenshots/email_logs.png)
 

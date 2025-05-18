@@ -13,7 +13,7 @@ A robust SMTP testing and email sending utility designed for Docker, providing c
 
 - **Web GUI** with intuitive and customizable design
 - **CLI support** for scripting and automation
-- **Advanced email validation** testing (DKIM, SPF, DMARC) see **Note**
+- **Advanced email validation** testing (DKIM, SPF, DMARC) see ![Note](https://github.com/T-W-S/smtp-test-tool#note)
 - **Template management** for reusing common email formats
 - **Responsive UI** with customizable orange theme
 

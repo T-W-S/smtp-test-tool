@@ -4,7 +4,7 @@
 
 # SMTP Testing Tool
 
-A robust SMTP testing and email sending utility designed for Docker, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
+A SMTP testing and email sending utility designed for Docker, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
 
 ![Main Interface](screenshots/main_interface.png)
 

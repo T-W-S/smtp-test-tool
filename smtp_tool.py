@@ -68,6 +68,8 @@ class SMTPTool:
             dict: Result of the operation with 'success' and optionally 'error' keys
         """
         smtp_log = []
+        start_time = time.time()
+        smtp_log.append(f"Email Sending Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}")
         
         # Create a log capture function with better formatting
         def log_smtp(smtp_instance, prefix=""):
@@ -167,10 +169,47 @@ class SMTPTool:
                                          filename=attachment_filename)
                     msg.attach(attachment)
             
+            # Log connection attempt details
+            smtp_log.append(f"Connection Info:")
+            smtp_log.append(f"  - Server: {server}:{port}")
+            smtp_log.append(f"  - SSL: {'Yes' if use_ssl else 'No'}")
+            smtp_log.append(f"  - STARTTLS: {'Yes' if use_tls and not use_ssl else 'No'}")
+            smtp_log.append(f"  - Local Hostname: {hostname or 'Default'}")
+            
             # Connect to the SMTP server
             if use_ssl:
                 context = ssl.create_default_context()
                 smtp = smtplib.SMTP_SSL(server, port, local_hostname=hostname, context=context)
+                
+                # Log SSL connection details immediately
+                try:
+                    sock = smtp.sock
+                    if hasattr(sock, 'cipher') and callable(sock.cipher):
+                        cipher_info = sock.cipher()
+                        if cipher_info:
+                            tls_protocol = sock.version() if hasattr(sock, 'version') else 'Unknown'
+                            cipher_name = cipher_info[0] if cipher_info else 'Unknown'
+                            cipher_version = cipher_info[1] if len(cipher_info) > 1 else 'Unknown'
+                            cipher_bits = cipher_info[2] if len(cipher_info) > 2 else 'Unknown'
+                            
+                            smtp_log.append(f"SSL/TLS Connection Details:")
+                            smtp_log.append(f"  - Protocol: {tls_protocol}")
+                            smtp_log.append(f"  - Cipher: {cipher_name}")
+                            smtp_log.append(f"  - Version: {cipher_version}")
+                            smtp_log.append(f"  - Bits: {cipher_bits}")
+                            
+                            # Get server certificate info
+                            if hasattr(sock, 'getpeercert'):
+                                cert = sock.getpeercert()
+                                if cert:
+                                    subject = dict(x[0] for x in cert.get('subject', []))
+                                    issuer = dict(x[0] for x in cert.get('issuer', []))
+                                    smtp_log.append(f"  - Server Certificate: {subject.get('commonName', 'Unknown')}")
+                                    smtp_log.append(f"  - Issuer: {issuer.get('commonName', 'Unknown')}")
+                                    if 'notAfter' in cert:
+                                        smtp_log.append(f"  - Expires: {cert['notAfter']}")
+                except Exception as e:
+                    smtp_log.append(f"SSL Info: {str(e)}")
             else:
                 smtp = smtplib.SMTP(server, port, local_hostname=hostname)
             
@@ -180,7 +219,15 @@ class SMTPTool:
                 
             # Use EHLO/HELO with custom domain if specified
             if ehlo_as:
-                smtp.ehlo(ehlo_as)
+                response = smtp.ehlo(ehlo_as)
+                # Log server capabilities
+                if hasattr(smtp, 'esmtp_features') and smtp.esmtp_features:
+                    smtp_log.append(f"Server Capabilities:")
+                    for feature, params in smtp.esmtp_features.items():
+                        if params:
+                            smtp_log.append(f"  - {feature}: {params}")
+                        else:
+                            smtp_log.append(f"  - {feature}")
             elif helo_as:
                 smtp.helo(helo_as)
             
@@ -188,13 +235,52 @@ class SMTPTool:
             if use_tls and not use_ssl:
                 context = ssl.create_default_context()
                 smtp.starttls(context=context)
+                
+                # Log detailed TLS information after STARTTLS
+                try:
+                    sock = smtp.sock
+                    if hasattr(sock, 'cipher') and callable(sock.cipher):
+                        cipher_info = sock.cipher()
+                        if cipher_info:
+                            tls_protocol = sock.version() if hasattr(sock, 'version') else 'Unknown'
+                            cipher_name = cipher_info[0] if cipher_info else 'Unknown'
+                            cipher_version = cipher_info[1] if len(cipher_info) > 1 else 'Unknown'
+                            cipher_bits = cipher_info[2] if len(cipher_info) > 2 else 'Unknown'
+                            
+                            smtp_log.append(f"TLS Connection Established:")
+                            smtp_log.append(f"  - Protocol: {tls_protocol}")
+                            smtp_log.append(f"  - Cipher: {cipher_name}")
+                            smtp_log.append(f"  - Version: {cipher_version}")
+                            smtp_log.append(f"  - Bits: {cipher_bits}")
+                            
+                            # Get server certificate info if available
+                            if hasattr(sock, 'getpeercert'):
+                                cert = sock.getpeercert()
+                                if cert:
+                                    subject = dict(x[0] for x in cert.get('subject', []))
+                                    issuer = dict(x[0] for x in cert.get('issuer', []))
+                                    smtp_log.append(f"  - Server Certificate Subject: {subject.get('commonName', 'Unknown')}")
+                                    smtp_log.append(f"  - Certificate Issuer: {issuer.get('commonName', 'Unknown')}")
+                                    if 'notAfter' in cert:
+                                        smtp_log.append(f"  - Certificate Expires: {cert['notAfter']}")
+                except Exception as e:
+                    smtp_log.append(f"TLS Info: Could not retrieve detailed TLS information: {str(e)}")
+                
                 # Need to EHLO again after STARTTLS
                 if ehlo_as:
                     smtp.ehlo(ehlo_as)
             
             # Authenticate if credentials are provided
             if username and password:
+                # Log available authentication methods
+                if hasattr(smtp, 'esmtp_features') and 'auth' in smtp.esmtp_features:
+                    auth_methods = smtp.esmtp_features['auth']
+                    smtp_log.append(f"Authentication Info:")
+                    smtp_log.append(f"  - Methods Available: {auth_methods}")
+                    smtp_log.append(f"  - Using: {username}")
+                
                 smtp.login(username, password)
+                smtp_log.append(f"  - Status: Authentication successful")
             
             # Send the email
             all_recipients = recipients + cc + bcc
@@ -202,6 +288,11 @@ class SMTPTool:
             
             # Close the connection
             smtp.quit()
+            
+            end_time = time.time()
+            duration = end_time - start_time
+            smtp_log.append(f"Email Sending Completed: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
+            smtp_log.append(f"Total Duration: {duration:.2f} seconds")
             
             logger.info(f"Email sent successfully to {', '.join(recipients)}")
             return {
@@ -401,7 +492,7 @@ class SMTPTool:
         buffer.seek(0)
         return filename, buffer.getvalue()
     
-    # Removed Word and Excel attachment creation functions
+    # Removed Word and Excel attachment creation functions as requested
         
     def create_spf_test_email(self, recipient):
         """Create an email specifically to test SPF validation
@@ -439,4 +530,4 @@ This test is useful for confirming that SPF checks are working properly on the r
 
     
     # Removed functions: create_dkim_test_email, create_dmarc_test_email, create_spf_dkim_dmarc_test_email
-  
+    # Only keeping SPF test as requested

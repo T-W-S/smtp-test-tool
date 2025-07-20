@@ -275,11 +275,23 @@ $(document).ready(function() {
                     return `← SERVER: ${content}`;
                 } else if (line.startsWith('data:')) {
                     return `📤 DATA: ${cleanLine.substring(5).trim()}`;
+                } else if (line.includes('Connection Info:')) {
+                    return `🔗 ${cleanLine}`;
+                } else if (line.includes('SSL/TLS Connection Details:') || line.includes('TLS Connection Established:')) {
+                    return `🔐 ${cleanLine}`;
+                } else if (line.includes('Server Capabilities:')) {
+                    return `⚙️ ${cleanLine}`;
+                } else if (line.includes('Authentication Info:')) {
+                    return `🔑 ${cleanLine}`;
+                } else if (line.includes('Email Sending Started:') || line.includes('Email Sending Completed:')) {
+                    return `⏰ ${cleanLine}`;
+                } else if (line.includes('Total Duration:')) {
+                    return `⏱️ ${cleanLine}`;
                 } else if (line.includes('connect') || line.includes('Connected')) {
                     return `🔗 CONNECTION: ${cleanLine}`;
                 } else if (line.includes('error') || line.includes('Error')) {
                     return `❌ ERROR: ${cleanLine}`;
-                } else if (line.includes('success') || line.includes('Success') || line.includes('Ok')) {
+                } else if (line.includes('success') || line.includes('Success') || line.includes('Ok') || line.includes('Authentication successful')) {
                     return `✅ SUCCESS: ${cleanLine}`;
                 } else if (line.includes('retcode')) {
                     let content = cleanLine.replace('reply: retcode', 'Response Code');

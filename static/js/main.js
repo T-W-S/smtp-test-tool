@@ -209,33 +209,25 @@ $(document).ready(function() {
         });
     });
     
-    // Track form submission to prevent duplicates
-    let isSubmitting = false;
+    // Track if form is currently being submitted
+    let isFormSubmitting = false;
     
-    // Handle form submission via AJAX - with enhanced duplicate protection
+    // Handle form submission via AJAX
     $('#emailForm').submit(function(e) {
         e.preventDefault();
         
-        // Disable the submit button immediately to prevent multiple clicks
-        $('#sendButton').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Sending...');
-        
-        // Abort immediately if already submitting 
-        if (isSubmitting) {
-            console.log('Preventing duplicate submission');
+        // Prevent duplicate submissions
+        if (isFormSubmitting) {
+            console.log('Form already submitting, ignoring duplicate');
             return false;
         }
         
-        // Set submission flag 
-        isSubmitting = true;
-        
-        // Generate a unique ID for this specific submission
-        const uniqueId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        // Set submission flag and disable button
+        isFormSubmitting = true;
+        $('#sendButton').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Sending...');
         
         // Create form data object
         const formData = new FormData(this);
-        
-        // Add client ID for server-side duplicate prevention
-        formData.append('client_id', uniqueId);
         
         // Set the body type based on HTML toggle and ensure the correct Content-Type
         const isHtml = $('#htmlToggle').is(':checked');
@@ -281,7 +273,7 @@ $(document).ready(function() {
             success: function(response) {
                 // Reset the button and submission flag
                 $('#sendButton').html('<i class="fas fa-paper-plane me-2"></i>Send Email').prop('disabled', false);
-                isSubmitting = false;
+                isFormSubmitting = false;
                 
                 // Show status modal
                 if (response.success) {
@@ -298,7 +290,7 @@ $(document).ready(function() {
             error: function(xhr, status, error) {
                 // Reset the button and submission flag
                 $('#sendButton').html('<i class="fas fa-paper-plane me-2"></i>Send Email').prop('disabled', false);
-                isSubmitting = false;
+                isFormSubmitting = false;
                 
                 // Show error message
                 $('#statusModalHeader').removeClass('bg-success').addClass('bg-danger');

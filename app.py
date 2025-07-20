@@ -180,21 +180,35 @@ def index():
                           saved_recipients=saved_recipients,
                           default_sender=default_sender)
 
-# Global request cache for duplicate prevention
+# Global request cache (currently unused but available for future rate limiting)
 _request_cache = {}
 
 @app.route('/send_email', methods=['POST'])
 def send_email():
     """API endpoint to send an email"""
-    # Simple rate limiting to prevent rapid duplicate submissions
-    client_id = request.form.get('client_id', '')
+    global _request_cache
     
-    # Check if this exact request was recently processed
-    if client_id and client_id in _request_cache:
-        cache_time, cache_result = _request_cache[client_id]
-        if time.time() - cache_time < 5:  # 5 second window
-            logger.warning(f"Duplicate submission prevented for client_id: {client_id}")
-            return jsonify(cache_result)
+    # Ultra-simple duplicate prevention - track request by timestamp + form data
+    import hashlib
+    current_time = time.time()
+    
+    # Create unique identifier for this request
+    form_items = sorted([(k, v) for k, v in request.form.items() if k != 'timestamp'])
+    form_string = str(form_items)
+    request_id = hashlib.sha256(form_string.encode()).hexdigest()[:12]
+    
+    # Check if this exact request was made in the last 8 seconds
+    if request_id in _request_cache:
+        last_time = _request_cache[request_id]
+        if current_time - last_time < 8:
+            logger.warning(f"BLOCKING duplicate request: {request_id}")
+            return jsonify({'success': True, 'message': 'Email already processed'})
+    
+    # Record this request
+    _request_cache[request_id] = current_time
+    
+    # Clean old entries (keep last 30 seconds)
+    _request_cache = {k: v for k, v in _request_cache.items() if current_time - v < 30}
     
     # Get body type for HTML processing
     body_type = request.form.get('body_type', 'plain')
@@ -332,16 +346,7 @@ def send_email():
                 log_entry['body_type'] = body_type
                 
             config_manager.add_log_entry(log_entry)
-            result_response = {'success': True, 'message': 'Email sent'}
-            
-            # Cache the result for duplicate prevention
-            if client_id:
-                _request_cache[client_id] = (time.time(), result_response)
-                # Clean old cache entries
-                current_time = time.time()
-                _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
-                
-            return jsonify(result_response)
+            return jsonify({'success': True, 'message': 'Email sent'})
         else:
             # Log the failed email send
             log_entry = {
@@ -359,29 +364,11 @@ def send_email():
                 'smtp_log': result.get('smtp_log', [])
             }
             config_manager.add_log_entry(log_entry)
-            result_response = {'success': False, 'message': f'Email failed: {result["error"]}'}
-            
-            # Cache the result for duplicate prevention
-            if client_id:
-                _request_cache[client_id] = (time.time(), result_response)
-                # Clean old cache entries
-                current_time = time.time()
-                _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
-                
-            return jsonify(result_response)
+            return jsonify({'success': False, 'message': f'Email failed: {result["error"]}'})
     
     except Exception as e:
         logger.exception("Error sending email")
-        result_response = {'success': False, 'message': f'Email failed: {str(e)}'}
-        
-        # Cache the result for duplicate prevention
-        if client_id:
-            _request_cache[client_id] = (time.time(), result_response)
-            # Clean old cache entries
-            current_time = time.time()
-            _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
-            
-        return jsonify(result_response)
+        return jsonify({'success': False, 'message': f'Email failed: {str(e)}'})
 
 @app.route('/settings')
 def settings():

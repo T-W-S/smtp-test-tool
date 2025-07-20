@@ -155,49 +155,7 @@ If properly implemented, this test message will help verify SPF functionality.
 """
         })
         
-        # DKIM Test
-        config_manager.add_template({
-            'name': 'DKIM Test',
-            'subject': 'DKIM Authentication Test',
-            'body_type': 'plain',
-            'body': """This is a test email specifically for checking DKIM validation.
-
-DomainKeys Identified Mail (DKIM) provides a digital signature that lets the recipient verify
-that an email was actually sent by the claimed sender, and that the message wasn't altered in transit.
-
-When checking this test email, examine the headers to verify DKIM signatures.
-"""
-        })
-
-        # DMARC Test
-        config_manager.add_template({
-            'name': 'DMARC Test',
-            'subject': 'DMARC Authentication Test',
-            'body_type': 'plain',
-            'body': """This is a test email specifically for checking DMARC validation.
-
-Domain-based Message Authentication, Reporting, and Conformance (DMARC) works with SPF and DKIM
-to help email receivers determine if the email is legitimately from the sender domain.
-
-When checking this test email, examine the headers for DMARC validation results.
-"""
-        })
-        
-        # Combined SPF/DKIM/DMARC - Internal use only, not shown in templates page
-        config_manager.add_template({
-            'name': '_SPF_DKIM_DMARC_Combined',
-            'subject': 'Combined SPF/DKIM/DMARC Authentication Test',
-            'body_type': 'plain',
-            'body': """This is a comprehensive test email for checking all email authentication mechanisms.
-
-This email tests:
-1. SPF (Sender Policy Framework) validation 
-2. DKIM (DomainKeys Identified Mail) signatures
-3. DMARC (Domain-based Message Authentication, Reporting, and Conformance) compliance
-
-When checking this email, examine the full headers to see the validation results for all three mechanisms.
-"""
-        })
+        # Removed DKIM, DMARC, and combined authentication test templates
         
         logger.info("Initialized default email templates")
 
@@ -237,7 +195,7 @@ def send_email():
             mod_time = os.path.getmtime(lock_file)
             if time.time() - mod_time < 5:
                 logger.warning(f"Duplicate submission prevented by lock file")
-                return jsonify({'success': True, 'message': 'Email already sent (duplicate prevented)'})
+                return jsonify({'success': True, 'message': 'Email already sent'})
                 
         # Create new lock file
         with open(lock_file, 'w') as f:
@@ -308,7 +266,8 @@ def send_email():
                         f.write(data)
                     attachments.append(temp_path)
                 
-               
+
+                
                 elif attachment_type == 'eicar':
                     filename, data = smtp_tool.create_eicar_attachment()
                     temp_path = os.path.join('/tmp', filename)
@@ -322,7 +281,7 @@ def send_email():
         # Get application settings
         settings = config_manager.get_settings()
         
-        # Get any custom headers for SPF/DKIM tests
+        # Get any custom headers for special tests
         custom_headers = {}
         if request.form.get('custom_headers'):
             try:
@@ -789,27 +748,7 @@ def get_test_data():
                 }
             })
         
-        elif test_type == 'docx':
-            # DOCX attachment test
-            test_data.update({
-                'subject': 'DOCX Attachment Test',
-                'body': 'This email contains a DOCX (Word document) attachment generated for testing purposes.',
-                'special_attachment': {
-                    'type': 'docx',
-                    'active_content': False
-                }
-            })
-        
-        elif test_type == 'xlsx':
-            # XLSX attachment test
-            test_data.update({
-                'subject': 'XLSX Attachment Test',
-                'body': 'This email contains an XLSX (Excel spreadsheet) attachment generated for testing purposes.',
-                'special_attachment': {
-                    'type': 'xlsx',
-                    'active_content': False
-                }
-            })
+        # Removed docx and xlsx test types as requested
         
         elif test_type == 'eicar':
             # EICAR antivirus test
@@ -832,22 +771,7 @@ Note: Your email system or antivirus might block this email entirely.""",
             spf_test = smtp_tool.create_spf_test_email(recipient)
             test_data.update(spf_test)
             
-        elif test_type == 'dkim':
-            # DKIM test only
-            dkim_test = smtp_tool.create_dkim_test_email(recipient)
-            # Log the DKIM header for debugging
-            logger.info(f"DKIM test email created with headers: {dkim_test.get('custom_headers', {})}")
-            test_data.update(dkim_test)
-            
-        elif test_type == 'dmarc':
-            # DMARC test only
-            dmarc_test = smtp_tool.create_dmarc_test_email(recipient)
-            test_data.update(dmarc_test)
-            
-        elif test_type == 'spf-dkim-dmarc':
-            # Combined SPF/DKIM/DMARC test
-            combined_test = smtp_tool.create_spf_dkim_dmarc_test_email(recipient)
-            test_data.update(combined_test)
+        # Removed DKIM, DMARC, and combined tests
             
         else:
             return jsonify({'success': False, 'message': f'Unknown test type: {test_type}'})

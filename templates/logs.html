@@ -141,8 +141,13 @@
                     <!-- SMTP Traffic Tab -->
                     <div class="tab-pane fade" id="smtp-content" role="tabpanel" aria-labelledby="smtp-tab">
                         <div class="mb-3">
-                            <div class="card card-body bg-dark text-light">
-                                <pre id="logSmtpTraffic" class="mb-0" style="white-space: pre-wrap; font-size: 0.8rem;">No SMTP traffic data available</pre>
+                            <div class="card">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>SMTP Conversation</h6>
+                                </div>
+                                <div class="card-body bg-dark text-light p-3">
+                                    <pre id="logSmtpTraffic" class="mb-0" style="white-space: pre-wrap; font-size: 0.85rem; line-height: 1.4; color: #e9ecef;">No SMTP traffic data available</pre>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -164,8 +169,8 @@
 </div>
 
 <script>
-// Store logs data in JavaScript
-var logEntries = {{ log_entries|tojson }};
+// Store logs data in JavaScript with safe JSON encoding
+var logEntries = {{ log_entries|tojson|safe }};
 </script>
 {% endblock %}
 
@@ -245,9 +250,58 @@ $(document).ready(function() {
             $('#logAttachments').append('<li class="list-group-item text-muted">No attachments</li>');
         }
         
-        // SMTP Traffic
+        // SMTP Traffic - format for better readability
         if (log.smtp_log && log.smtp_log.length > 0) {
-            $('#logSmtpTraffic').text(log.smtp_log.join('\n'));
+            let formattedLog = log.smtp_log.map(line => {
+                // Clean up the line first - remove b' prefixes and escape sequences
+                let cleanLine = line
+                    .replace(/^b'/, '')  // Remove b' prefix
+                    .replace(/'$/, '')   // Remove ' suffix
+                    .replace(/\\r\\n/g, '\n')  // Convert \r\n to actual newlines
+                    .replace(/\\n/g, '\n')     // Convert \n to actual newlines
+                    .replace(/\\'/g, "'")      // Convert \' to '
+                    .replace(/\\\\/g, '\\');   // Convert \\\\ to \\
+                
+                // Add visual indicators and formatting
+                if (line.startsWith('send:')) {
+                    let content = cleanLine.substring(5).trim();
+                    // Format email headers with proper line breaks
+                    if (content.includes('\\r\\n')) {
+                        content = content.replace(/\\r\\n/g, '\n    ');
+                    }
+                    return `→ CLIENT: ${content}`;
+                } else if (line.startsWith('reply:')) {
+                    let content = cleanLine.substring(6).trim();
+                    return `← SERVER: ${content}`;
+                } else if (line.startsWith('data:')) {
+                    return `📤 DATA: ${cleanLine.substring(5).trim()}`;
+                } else if (line.includes('connect') || line.includes('Connected')) {
+                    return `🔗 CONNECTION: ${cleanLine}`;
+                } else if (line.includes('error') || line.includes('Error')) {
+                    return `❌ ERROR: ${cleanLine}`;
+                } else if (line.includes('success') || line.includes('Success') || line.includes('Ok')) {
+                    return `✅ SUCCESS: ${cleanLine}`;
+                } else if (line.includes('retcode')) {
+                    let content = cleanLine.replace('reply: retcode', 'Response Code');
+                    return `📋 ${content}`;
+                } else {
+                    return `   ${cleanLine}`;
+                }
+            }).join('\n');
+            
+            // Further clean up the formatted log for better presentation
+            formattedLog = formattedLog
+                .replace(/Content-Type:/g, '\nContent-Type:')
+                .replace(/MIME-Version:/g, '\nMIME-Version:')
+                .replace(/From:/g, '\nFrom:')
+                .replace(/To:/g, '\nTo:')
+                .replace(/Subject:/g, '\nSubject:')
+                .replace(/Date:/g, '\nDate:')
+                .replace(/Message-ID:/g, '\nMessage-ID:')
+                .replace(/Content-Disposition:/g, '\nContent-Disposition:')
+                .replace(/--===============/g, '\n--===============');
+            
+            $('#logSmtpTraffic').text(formattedLog);
         } else {
             $('#logSmtpTraffic').text('No SMTP traffic data available');
         }

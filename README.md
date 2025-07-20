@@ -12,7 +12,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 ## Features
 
 - ***Web GUI** *with intuitive and customizable design*
-- ***Advanced email validation** *testing *SPF *see NOTE:*
+- ***Email validation** *testing *SPF *see NOTE:*
 - ***Template management** *for reusing common email formats*
 - ***Responsive UI** *with customizable orange theme*
 
@@ -50,6 +50,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 - *Save and manage multiple SMTP server profiles*
 - *Test connection to SMTP servers*
 - *Configure TLS/SSL options*
+- *Configure SMTP Authentication*
 
 * ### Logging and History
 

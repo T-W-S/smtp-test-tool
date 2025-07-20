@@ -12,7 +12,6 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 ## Features
 
 - ***Web GUI** *with intuitive and customizable design*
-- ***CLI support** *for scripting and automation*
 - ***Advanced email validation** *testing *SPF *see NOTE:*
 - ***Template management** *for reusing common email formats*
 - ***Responsive UI** *with customizable orange theme*

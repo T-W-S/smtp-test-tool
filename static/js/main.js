@@ -290,7 +290,7 @@ $(document).ready(function() {
                     $('#statusMessage').text(response.message);
                 } else {
                     $('#statusModalHeader').removeClass('bg-success').addClass('bg-danger');
-                    $('#statusModalTitle').text('Error');
+                    $('#statusModalTitle').text('Failed');
                     $('#statusMessage').text(response.message);
                 }
                 $('#statusModal').modal('show');
@@ -302,8 +302,8 @@ $(document).ready(function() {
                 
                 // Show error message
                 $('#statusModalHeader').removeClass('bg-success').addClass('bg-danger');
-                $('#statusModalTitle').text('Error');
-                $('#statusMessage').text('An error occurred while sending the email. Please try again.');
+                $('#statusModalTitle').text('Failed');
+                $('#statusMessage').text('Email failed. Please try again.');
                 $('#statusModal').modal('show');
                 
                 console.error('Error sending email:', error);

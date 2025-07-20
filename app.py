@@ -155,7 +155,7 @@ If properly implemented, this test message will help verify SPF functionality.
 """
         })
         
-        # Removed DKIM, DMARC, and combined authentication test templates
+        # Removed DKIM, DMARC, and combined authentication test templates as requested
         
         logger.info("Initialized default email templates")
 
@@ -186,22 +186,15 @@ _request_cache = {}
 @app.route('/send_email', methods=['POST'])
 def send_email():
     """API endpoint to send an email"""
-    # Simple semaphore lock to prevent duplicate submissions
-    lock_file = '/tmp/email_sending_lock'
+    # Simple rate limiting to prevent rapid duplicate submissions
+    client_id = request.form.get('client_id', '')
     
-    try:
-        # Check if lock exists and is recent (within 5 seconds)
-        if os.path.exists(lock_file):
-            mod_time = os.path.getmtime(lock_file)
-            if time.time() - mod_time < 5:
-                logger.warning(f"Duplicate submission prevented by lock file")
-                return jsonify({'success': True, 'message': 'Email sent'})
-                
-        # Create new lock file
-        with open(lock_file, 'w') as f:
-            f.write(str(time.time()))
-    except Exception as e:
-        logger.error(f"Error with lock file: {str(e)}")
+    # Check if this exact request was recently processed
+    if client_id and client_id in _request_cache:
+        cache_time, cache_result = _request_cache[client_id]
+        if time.time() - cache_time < 5:  # 5 second window
+            logger.warning(f"Duplicate submission prevented for client_id: {client_id}")
+            return jsonify(cache_result)
     
     # Get body type for HTML processing
     body_type = request.form.get('body_type', 'plain')
@@ -339,7 +332,16 @@ def send_email():
                 log_entry['body_type'] = body_type
                 
             config_manager.add_log_entry(log_entry)
-            return jsonify({'success': True, 'message': 'Email sent successfully'})
+            result_response = {'success': True, 'message': 'Email sent'}
+            
+            # Cache the result for duplicate prevention
+            if client_id:
+                _request_cache[client_id] = (time.time(), result_response)
+                # Clean old cache entries
+                current_time = time.time()
+                _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
+                
+            return jsonify(result_response)
         else:
             # Log the failed email send
             log_entry = {
@@ -357,11 +359,29 @@ def send_email():
                 'smtp_log': result.get('smtp_log', [])
             }
             config_manager.add_log_entry(log_entry)
-            return jsonify({'success': False, 'message': f'Failed to send email: {result["error"]}'})
+            result_response = {'success': False, 'message': f'Email failed: {result["error"]}'}
+            
+            # Cache the result for duplicate prevention
+            if client_id:
+                _request_cache[client_id] = (time.time(), result_response)
+                # Clean old cache entries
+                current_time = time.time()
+                _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
+                
+            return jsonify(result_response)
     
     except Exception as e:
         logger.exception("Error sending email")
-        return jsonify({'success': False, 'message': f'An error occurred: {str(e)}'})
+        result_response = {'success': False, 'message': f'Email failed: {str(e)}'}
+        
+        # Cache the result for duplicate prevention
+        if client_id:
+            _request_cache[client_id] = (time.time(), result_response)
+            # Clean old cache entries
+            current_time = time.time()
+            _request_cache.update({k: v for k, v in _request_cache.items() if current_time - v[0] < 60})
+            
+        return jsonify(result_response)
 
 @app.route('/settings')
 def settings():
@@ -771,7 +791,7 @@ Note: Your email system or antivirus might block this email entirely.""",
             spf_test = smtp_tool.create_spf_test_email(recipient)
             test_data.update(spf_test)
             
-        # Removed DKIM, DMARC, and combined tests
+        # Removed DKIM, DMARC, and combined tests as requested
             
         else:
             return jsonify({'success': False, 'message': f'Unknown test type: {test_type}'})

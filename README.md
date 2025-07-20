@@ -1,10 +1,10 @@
-> NOTE: *SPF and DKIM preconfigured test emails not completed yet i.e. SPF "only" triggers SPF softfail, DKIM does the same.*
+> NOTE: *SPF "only" triggers SPF softfail.*
 
 
 
 # SMTP Testing Tool - beta
 
-A SMTP testing tool designed for Docker, providing comprehensive email configuration, validation, and advanced email authentication testing capabilities.
+A SMTP testing tool designed to run in Docker.
 
 
 ![Main Interface](screenshots/main_interface.png)
@@ -13,7 +13,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 
 - ***Web GUI** *with intuitive and customizable design*
 - ***CLI support** *for scripting and automation*
-- ***Advanced email validation** *testing (*DKIM, *SPF, DMARC) *see NOTE:*
+- ***Advanced email validation** *testing *SPF *see NOTE:*
 - ***Template management** *for reusing common email formats*
 - ***Responsive UI** *with customizable orange theme*
 
@@ -38,7 +38,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 ![Email Testing](screenshots/email_testing.png)
 
 - *Send test emails with customizable settings*
-- *Test SPF, DKIM, and DMARC configurations*
+- *Test SPF, Eicar Test Virus*
 - *Create and use email templates*
 - *Attach files to test emails*
 

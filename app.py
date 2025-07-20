@@ -195,7 +195,7 @@ def send_email():
             mod_time = os.path.getmtime(lock_file)
             if time.time() - mod_time < 5:
                 logger.warning(f"Duplicate submission prevented by lock file")
-                return jsonify({'success': True, 'message': 'Email already sent'})
+                return jsonify({'success': True, 'message': 'Email sent'})
                 
         # Create new lock file
         with open(lock_file, 'w') as f:

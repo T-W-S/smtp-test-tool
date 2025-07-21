@@ -64,6 +64,7 @@
                                                data-port="{{ profile.port }}" 
                                                data-tls="{{ profile.use_tls|lower }}" 
                                                data-ssl="{{ profile.use_ssl|lower }}" 
+                                               data-no-tls-verify="{{ profile.no_tls_verify|lower }}" 
                                                data-username="{{ profile.username }}" 
                                                data-bs-toggle="modal" data-bs-target="#editProfileModal">
                                             <i class="fas fa-edit"></i>
@@ -122,6 +123,13 @@
                             <label class="form-check-label" for="use_ssl">
                                 Use SSL/TLS
                             </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="no_tls_verify" name="no_tls_verify">
+                            <label class="form-check-label" for="no_tls_verify">
+                                No TLS Verify
+                            </label>
+                            <small class="form-text text-muted">Disable certificate verification</small>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -207,11 +215,16 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Authentication:</label>
+                            <label class="form-label">Options:</label>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="editUseAuthentication">
                                 <label class="form-check-label" for="editUseAuthentication">Use Authentication</label>
                             </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editNoTlsVerify" name="no_tls_verify">
+                                <label class="form-check-label" for="editNoTlsVerify">No TLS Verify</label>
+                            </div>
+                            <small class="form-text text-muted">Disable certificate verification</small>
                         </div>
                     </div>
                     <div id="editAuthFields">

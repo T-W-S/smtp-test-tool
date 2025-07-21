@@ -110,6 +110,7 @@ class ConfigManager:
                 'port': profile_data['port'],
                 'use_tls': profile_data['use_tls'],
                 'use_ssl': profile_data['use_ssl'],
+                'no_tls_verify': profile_data.get('no_tls_verify', False),
                 'username': profile_data['username'],
                 'password': profile_data['password']
             }

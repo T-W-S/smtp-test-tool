@@ -56,7 +56,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 - *Configure TLS/SSL options*
 - *Skip certificate verification*
 - *Configure SMTP Authentication*
-- *Set hostname, Log Level, Default Sender Address in Advanced Settings*
+- *Advanced Settings: Set hostname, Log Level, Default Sender Address etc ...*
 
 * ### Logging and History
 

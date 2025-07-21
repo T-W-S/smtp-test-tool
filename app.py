@@ -527,31 +527,48 @@ def update_settings():
 @app.route('/add_profile', methods=['POST'])
 def add_profile():
     """API endpoint to add a new SMTP profile"""
+    # Detect AJAX requests
+    is_ajax = 'XMLHttpRequest' in request.headers.get('X-Requested-With', '')
+    
     try:
+            
         profile_data = {
             'name': request.form.get('name'),
             'server': request.form.get('server'),
             'port': int(request.form.get('port', 25)),
-            'use_tls': request.form.get('use_tls') == 'on',
-            'use_ssl': request.form.get('use_ssl') == 'on',
-            'no_tls_verify': request.form.get('no_tls_verify') == 'on',
+            'use_tls': request.form.get('use_tls') in ['on', 'true', True],
+            'use_ssl': request.form.get('use_ssl') in ['on', 'true', True],
+            'no_tls_verify': request.form.get('no_tls_verify') in ['on', 'true', True],
             'username': request.form.get('username', ''),
             'password': request.form.get('password', '')
         }
         
         # Validate profile data
         if not profile_data['name'] or not profile_data['server']:
-            return jsonify({'success': False, 'message': 'Profile name and server are required'})
+            message = 'Profile name and server are required'
+            if is_ajax:
+                return jsonify({'success': False, 'message': message})
+            else:
+                flash(message, 'danger')
+                return redirect(url_for('settings'))
         
         # Add the profile
         config_manager.add_profile(profile_data)
-        flash('SMTP profile added successfully', 'success')
-        return redirect(url_for('settings'))
+        
+        if is_ajax:
+            return jsonify({'success': True, 'message': 'SMTP profile saved successfully'})
+        else:
+            flash('SMTP profile added successfully', 'success')
+            return redirect(url_for('settings'))
     
     except Exception as e:
         logger.exception("Error adding profile")
-        flash(f'Error adding profile: {str(e)}', 'danger')
-        return redirect(url_for('settings'))
+        message = f'Error adding profile: {str(e)}'
+        if is_ajax:
+            return jsonify({'success': False, 'message': message})
+        else:
+            flash(message, 'danger')
+            return redirect(url_for('settings'))
 
 @app.route('/delete_profile/<name>', methods=['POST'])
 def delete_profile(name):

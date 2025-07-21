@@ -111,16 +111,7 @@ $(document).ready(function() {
         }
     });
     
-    // Security options for edit modal
-    $('input[name="security"]').change(function() {
-        if ($(this).val() === 'ssl') {
-            $('#editPort').val('465');
-        } else if ($(this).val() === 'tls') {
-            $('#editPort').val('587');
-        } else {
-            $('#editPort').val('25');
-        }
-    });
+    // Security options for edit modal (removed automatic port changes to preserve custom ports)
     
     // Toggle authentication fields in edit modal
     $('#editUseAuthentication').change(function() {
@@ -161,6 +152,9 @@ $(document).ready(function() {
             password = $('#editPassword').val();
         }
         
+        // Get no TLS verify setting
+        const no_tls_verify = $('#editNoTlsVerify').is(':checked');
+        
         // Send the profile data to server
         $.ajax({
             url: '/add_profile',
@@ -169,9 +163,11 @@ $(document).ready(function() {
                 name: profileName,
                 server: server,
                 port: port,
-                security: use_ssl ? 'ssl' : (use_tls ? 'tls' : 'none'),
+                use_tls: use_tls,
+                use_ssl: use_ssl,
                 username: username,
-                password: password
+                password: password,
+                no_tls_verify: no_tls_verify
             },
             success: function(response) {
                 if (response.success) {

@@ -50,6 +50,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 - *Save and manage multiple SMTP server profiles*
 - *Test connection to SMTP servers*
 - *Configure TLS/SSL options*
+- *Skip certificate verification*
 - *Configure SMTP Authentication*
 
 * ### Logging and History

@@ -24,7 +24,7 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 2. Run with Docker Compose:
 
    ```
-   docker-compose up -d
+   docker compose up -d
    ```
 3. Access the web interface at http://localhost:5000
 

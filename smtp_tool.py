@@ -39,7 +39,8 @@ class SMTPTool:
     def send_email(self, server, port, use_tls, use_ssl, username, password, 
                    sender, recipients, cc=None, bcc=None, subject='', body='', 
                    body_type='plain', attachments=None, custom_headers=None,
-                   hostname=None, ehlo_as=None, helo_as=None, mail_options=None):
+                   hostname=None, ehlo_as=None, helo_as=None, mail_options=None,
+                   no_tls_verify=False):
         """
         Send an email using the provided SMTP server and credentials
         
@@ -63,6 +64,7 @@ class SMTPTool:
             ehlo_as (str, optional): Domain to use in EHLO command
             helo_as (str, optional): Domain to use in HELO command
             mail_options (list, optional): Mail options for SMTP sendmail
+            no_tls_verify (bool, optional): Disable TLS certificate verification
             
         Returns:
             dict: Result of the operation with 'success' and optionally 'error' keys
@@ -175,10 +177,17 @@ class SMTPTool:
             smtp_log.append(f"  - SSL: {'Yes' if use_ssl else 'No'}")
             smtp_log.append(f"  - STARTTLS: {'Yes' if use_tls and not use_ssl else 'No'}")
             smtp_log.append(f"  - Local Hostname: {hostname or 'Default'}")
+            if no_tls_verify and (use_tls or use_ssl):
+                smtp_log.append(f"  - TLS Verification: Disabled")
+            elif use_tls or use_ssl:
+                smtp_log.append(f"  - TLS Verification: Enabled")
             
             # Connect to the SMTP server
             if use_ssl:
                 context = ssl.create_default_context()
+                if no_tls_verify:
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
                 smtp = smtplib.SMTP_SSL(server, port, local_hostname=hostname, context=context)
                 
                 # Log SSL connection details immediately
@@ -234,6 +243,9 @@ class SMTPTool:
             # Use TLS if requested
             if use_tls and not use_ssl:
                 context = ssl.create_default_context()
+                if no_tls_verify:
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
                 smtp.starttls(context=context)
                 
                 # Log detailed TLS information after STARTTLS
@@ -310,7 +322,7 @@ class SMTPTool:
             }
     
     def test_connection(self, server, port, use_tls, use_ssl, username, password, 
-                        hostname=None, ehlo_as=None, helo_as=None):
+                        hostname=None, ehlo_as=None, helo_as=None, no_tls_verify=False):
         """
         Test the connection to an SMTP server
         
@@ -324,6 +336,7 @@ class SMTPTool:
             hostname (str, optional): Hostname to use for SMTP connection
             ehlo_as (str, optional): Domain to use in EHLO command
             helo_as (str, optional): Domain to use in HELO command
+            no_tls_verify (bool, optional): Disable TLS certificate verification
             
         Returns:
             dict: Result of the operation with 'success' and optionally 'error' keys
@@ -364,6 +377,9 @@ class SMTPTool:
             # Connect to the SMTP server
             if use_ssl:
                 context = ssl.create_default_context()
+                if no_tls_verify:
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
                 smtp = smtplib.SMTP_SSL(server, port, local_hostname=hostname, context=context)
             else:
                 smtp = smtplib.SMTP(server, port, local_hostname=hostname)
@@ -388,6 +404,9 @@ class SMTPTool:
             # Use TLS if requested
             if use_tls and not use_ssl:
                 context = ssl.create_default_context()
+                if no_tls_verify:
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
                 smtp.starttls(context=context)
                 # Need to EHLO again after STARTTLS
                 if ehlo_as:

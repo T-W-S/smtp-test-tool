@@ -180,7 +180,7 @@ def index():
                           saved_recipients=saved_recipients,
                           default_sender=default_sender)
 
-# Global request cache (currently unused but available for future rate limiting)
+# Global request cache with results for duplicate prevention
 _request_cache = {}
 
 @app.route('/send_email', methods=['POST'])
@@ -199,16 +199,13 @@ def send_email():
     
     # Check if this exact request was made in the last 8 seconds
     if request_id in _request_cache:
-        last_time = _request_cache[request_id]
-        if current_time - last_time < 8:
+        cache_entry = _request_cache[request_id]
+        if current_time - cache_entry['time'] < 8:
             logger.warning(f"BLOCKING duplicate request: {request_id}")
-            return jsonify({'success': True, 'message': 'Email Sent'})
-    
-    # Record this request
-    _request_cache[request_id] = current_time
+            return jsonify(cache_entry['result'])
     
     # Clean old entries (keep last 30 seconds)
-    _request_cache = {k: v for k, v in _request_cache.items() if current_time - v < 30}
+    _request_cache = {k: v for k, v in _request_cache.items() if current_time - v.get('time', 0) < 30}
     
     # Get body type for HTML processing
     body_type = request.form.get('body_type', 'plain')
@@ -347,7 +344,11 @@ def send_email():
                 log_entry['body_type'] = body_type
                 
             config_manager.add_log_entry(log_entry)
-            return jsonify({'success': True, 'message': 'Email sent'})
+            
+            # Store successful result in cache
+            success_result = {'success': True, 'message': 'Email sent'}
+            _request_cache[request_id] = {'time': current_time, 'result': success_result}
+            return jsonify(success_result)
         else:
             # Log the failed email send
             log_entry = {
@@ -365,11 +366,19 @@ def send_email():
                 'smtp_log': result.get('smtp_log', [])
             }
             config_manager.add_log_entry(log_entry)
-            return jsonify({'success': False, 'message': f'Email failed: {result["error"]}'})
+            
+            # Store failed result in cache
+            failure_result = {'success': False, 'message': f'Email failed: {result["error"]}'}
+            _request_cache[request_id] = {'time': current_time, 'result': failure_result}
+            return jsonify(failure_result)
     
     except Exception as e:
         logger.exception("Error sending email")
-        return jsonify({'success': False, 'message': f'Email failed: {str(e)}'})
+        
+        # Store exception result in cache
+        exception_result = {'success': False, 'message': f'Email failed: {str(e)}'}
+        _request_cache[request_id] = {'time': current_time, 'result': exception_result}
+        return jsonify(exception_result)
 
 @app.route('/settings')
 def settings():

@@ -14,6 +14,7 @@ $(document).ready(function() {
         const port = $(this).data('port');
         const useTls = $(this).data('tls');
         const useSsl = $(this).data('ssl');
+        const noTlsVerify = $(this).data('no-tls-verify');
         const username = $(this).data('username');
         
         // Populate the edit form
@@ -29,6 +30,9 @@ $(document).ready(function() {
         } else {
             $('#editSecurityNone').prop('checked', true);
         }
+        
+        // Set no TLS verify option
+        $('#editNoTlsVerify').prop('checked', noTlsVerify === true);
         
         // Set authentication options
         if (username && username.length > 0) {

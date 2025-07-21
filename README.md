@@ -45,6 +45,8 @@ A SMTP testing tool designed for Docker, providing comprehensive email configura
 
 
 
+![SMTP Profiles](screenshots/smtp_profiles_1.png)
+
 ![SMTP Profiles](screenshots/smtp_profiles.png)
 
 - *Save and manage multiple SMTP server profiles*

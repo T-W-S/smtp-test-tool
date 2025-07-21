@@ -202,7 +202,7 @@ def send_email():
         last_time = _request_cache[request_id]
         if current_time - last_time < 8:
             logger.warning(f"BLOCKING duplicate request: {request_id}")
-            return jsonify({'success': True, 'message': 'Email already processed'})
+            return jsonify({'success': True, 'message': 'Email Sent'})
     
     # Record this request
     _request_cache[request_id] = current_time
@@ -315,7 +315,8 @@ def send_email():
             body_type=body_type,
             attachments=attachments,
             hostname=settings.get('send_hostname'),
-            custom_headers=custom_headers
+            custom_headers=custom_headers,
+            no_tls_verify=profile.get('no_tls_verify', False)
         )
         
         # Clean up temporary files
@@ -533,6 +534,7 @@ def add_profile():
             'port': int(request.form.get('port', 25)),
             'use_tls': request.form.get('use_tls') == 'on',
             'use_ssl': request.form.get('use_ssl') == 'on',
+            'no_tls_verify': request.form.get('no_tls_verify') == 'on',
             'username': request.form.get('username', ''),
             'password': request.form.get('password', '')
         }
@@ -690,7 +692,8 @@ def test_connection():
             use_ssl=profile['use_ssl'],
             username=profile['username'],
             password=profile['password'],
-            hostname=settings.get('send_hostname')
+            hostname=settings.get('send_hostname'),
+            no_tls_verify=profile.get('no_tls_verify', False)
         )
         
         return jsonify(result)

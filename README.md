@@ -1,3 +1,4 @@
+> Currently no further development or bug fixes
 > NOTE: *SPF "only" triggers SPF softfail.*
 
 
